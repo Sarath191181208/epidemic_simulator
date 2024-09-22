@@ -85,6 +85,7 @@ class App:
             self.zoom_level *= ZOOM_SCALE
         elif event.button == 5:  # Scroll down to zoom out
             self.zoom_level /= ZOOM_SCALE
+        self.zoom_level = max(0.5, min(self.zoom_level, 2))
 
     def update_offset(self, rel: tuple[int, int]):
         dx, dy = rel
@@ -123,7 +124,8 @@ class App:
                 self.is_placing_last_coords = (grid_x, grid_y)
                 self.mouse_state = MouseState.IS_PLACING
 
-    def place_blocks_in_grid(self, grid: Grid, mouse_pos: tuple[int, int]):
+    def place_blocks_in_grid(self, mouse_pos: tuple[int, int]):
+        grid = self.grid
         grid_x, grid_y = self.get_grid_coords(mouse_pos)
 
         # clear the previous block
@@ -150,8 +152,6 @@ class App:
         # Draw the grid
         self.grid.draw_grid()
 
-        # set limits for zoom level
-        zoom_level = max(0.5, min(zoom_level, 2))
         # Create a scaled version of the grid surface for zooming
         zoomed_surface = pygame.transform.scale(
             self.map_surface,

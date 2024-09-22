@@ -94,8 +94,11 @@ def main():
                     app.update_offset(event.rel)
 
                 elif app.mouse_state == MouseState.IS_PLACING:
-                    if app.map_surface.get_rect().collidepoint(*mouse_pos):
-                        app.place_blocks_in_grid(grid, mouse_pos)
+                    BUFFER_SIZE = 20
+                    if mouse_pos[0] < (
+                        app.MAP_WIDTH - BUFFER_SIZE
+                    ) and app.map_surface.get_rect().collidepoint(*mouse_pos):
+                        app.place_blocks_in_grid(mouse_pos)
 
         # check if released
         left_release = not left_click
@@ -119,7 +122,7 @@ def main():
         # Draw and update the buttons
         buttons_col.update(pygame.mouse.get_pos())
         buttons_col.draw()
-        
+
         # Draw the app
         app.draw()
 
