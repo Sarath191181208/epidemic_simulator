@@ -43,7 +43,6 @@ def load_grid_from_txt(surface: pygame.Surface, grid_size: int, filename: str | 
     # if filename is none check the latest file 
     if filename is None:
         files = os.listdir("saves")
-        print(files)
         if not files:
             return 
         filename = max(files)
@@ -94,10 +93,8 @@ class Grid:
         x1, y1 = p1 
         x2, y2 = p2
 
-        x1 = min(x1, x2)
-        x2 = max(x1, x2) 
-        y1 = min(y1, y2)
-        y2 = max(y1, y2)
+        x1, x2 = min(x1, x2), max(x1, x2)
+        y1, y2 = min(y1, y2), max(y1, y2)
 
         if not self.check_in_bounds(x1, y1) or not self.check_in_bounds(x2, y2):
             return 
