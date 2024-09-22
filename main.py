@@ -115,7 +115,24 @@ def main():
 
         # Set the cursor based on the mouse state
         if app.mouse_state == MouseState.PLACING:
-            pygame.mouse.set_cursor(*pygame.cursors.diamond)
+            # pygame.mouse.set_cursor(*pygame.cursors.diamond)
+            # the cursor should have a color at the center 
+            cx, cy = 16, 16
+            cursor_surf = pygame.Surface((32, 32), pygame.SRCALPHA) 
+
+            # draw a circle 
+            pygame.draw.circle(cursor_surf, grid.current_block.value or (GREY), (cx, cy), 12)
+            # draw a black outline around the circle 
+            pygame.draw.circle(cursor_surf, BLACK, (cx, cy), 12, 2)
+            # draw a cross 
+            pygame.draw.line(cursor_surf, BLACK, (cx - 5, cy), (cx + 5, cy), 2)
+            pygame.draw.line(cursor_surf, BLACK, (cx, cy - 5), (cx, cy + 5), 2)
+    
+            # Create the cursor 
+            cursor = pygame.cursors.Cursor((16, 16), cursor_surf)
+            # set the cursor 
+            pygame.mouse.set_cursor(cursor)
+
         elif app.mouse_state == MouseState.PANNING:
             pygame.mouse.set_cursor(
                 *pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
