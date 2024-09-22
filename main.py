@@ -95,7 +95,7 @@ def main():
         )
     )
 
-    def get_change_to_pan_state():
+    def set_to_pan_state():
         def change_to_pan_state():
             nonlocal mouse_state
             mouse_state = MouseState.PANNING 
@@ -105,7 +105,7 @@ def main():
     buttons_col.add_widget( 
         Button(
             "pan",
-            get_change_to_pan_state(),
+            set_to_pan_state(),
             button_color=pygame.Color(*GREEN),
         )
     )
@@ -137,6 +137,23 @@ def main():
 
             # Handle the chaning of mouse states if h is pressed
             if event.type == pygame.KEYDOWN:
+                # check for num keys and handle trigger the keypress from buttons 
+                if event.key == pygame.K_1: 
+                    grid.current_block = GridState.ROAD 
+                if event.key == pygame.K_2:
+                    grid.current_block = GridState.OFFICE
+                if event.key == pygame.K_3:
+                    grid.current_block = GridState.HOUSE
+                if event.key == pygame.K_4:
+                    grid.current_block = GridState.MALL
+                if event.key == pygame.K_5:
+                    grid.current_block = GridState.SCHOOL
+                if event.key == pygame.K_6:
+                    grid.current_block = GridState.PARK 
+                if event.key == pygame.K_0:
+                    grid.current_block = GridState.EMPTY 
+                if event.key == pygame.K_ESCAPE: 
+                    mouse_state = MouseState.PLACING
                 if event.key == pygame.K_h:
                     mouse_state = MouseState.PANNING
                 if event.key == pygame.K_v:
