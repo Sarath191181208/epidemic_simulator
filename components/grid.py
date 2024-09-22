@@ -81,6 +81,8 @@ class Grid:
                 or self.grid[r][c] == GridState.EMPTY
             ):
                 return
+            if self.grid[r][c] == GridState.ROAD:
+                return
             blocks[r][c] = block_id
             sm_blocks += 1
             block_id_to_capacity[block_id] += 1
@@ -97,6 +99,7 @@ class Grid:
                 ):
                     continue
                 dfs(c, r, block_id)
+                block_id += 1
 
         self.block_ids = blocks
 
@@ -246,7 +249,6 @@ class Grid:
     def get_a_star_path(self, src, dest):
         r, c = dest
         dest_type = self.grid[r][c]
-        came_from = {}
 
         def match(p1: tuple[int, int], p2: tuple[int, int]) -> bool:
             r, c = p1
@@ -277,11 +279,11 @@ class Grid:
 
         # find the path from src to dest
         def a_star(src, dest):
-
             open_list = [src]
-            closed_list = set()
+            visited_set = set()
             g = {src: 0}
             f = {src: h(src, dest)}
+            came_from = dict()
 
             while open_list:
                 current = min(open_list, key=lambda x: f[x])
@@ -294,10 +296,10 @@ class Grid:
                     return path[::-1]
 
                 open_list.remove(current)
-                closed_list.add(current)
+                visited_set.add(current)
 
                 for neighbour in get_neighbours(current):
-                    if neighbour in closed_list:
+                    if neighbour in visited_set:
                         continue
                     if neighbour not in open_list:
                         open_list.append(neighbour)
