@@ -57,10 +57,3 @@ class Button(Drawable):
         if self.is_hovered(mouse_pos) and left_click:
             self.action()
         return None
-
-
-def late_binding(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs) -> Callable[[], None]:
-        return lambda: fn(*args, **kwargs)
-    return wrapper
