@@ -61,6 +61,19 @@ def main():
         )
     )
 
+    simulation_timer = Timer(SECOND/(120), lambda: app.get_grid().update_min(), loop=True)
+    def start_simulation():
+        app.grid.generate_population()
+        simulation_timer.start_timer()
+
+    buttons_col.add_widget(
+        Button(
+            "simulate",
+            start_simulation,
+            button_color=pygame.Color(*GREEN),
+        )
+    )
+
     # create a save timer
     save_timer = Timer(SECOND * 30, lambda: save_grid_as_txt(grid), loop=True)
     save_timer.start_timer()
@@ -68,10 +81,12 @@ def main():
     # Main loop
     while True:
         save_timer.update()
+        simulation_timer.update()
 
         app.root_surface.fill(WHITE)
         app.map_surface.fill(WHITE)
         app.button_surface.fill(GREY)
+        app.hud_surface.fill(GREY)
 
         mouse_pos = pygame.mouse.get_pos()
         left_click = pygame.mouse.get_pressed()[0]
@@ -141,6 +156,11 @@ def main():
         # Draw and update the buttons
         buttons_col.update(pygame.mouse.get_pos())
         buttons_col.draw()
+
+        # Create a text on app.hud_surface with grid.day, grid.hour, grid.sec use pygame 
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Day: {grid.day}, Hour: {grid.hrs}, Sec: {grid.secs}", True, BLACK)
+        app.hud_surface.blit(text, (10, 10))
 
         # Draw the app
         app.draw()

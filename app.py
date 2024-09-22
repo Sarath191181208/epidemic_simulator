@@ -2,7 +2,7 @@ from enum import Enum, unique
 
 import pygame
 from components.grid import Grid, GridState, load_grid_from_txt, save_grid_as_txt
-from const import BUTTON_WIDTH, WIDTH, HEIGHT, BLOCK_SIZE, ZOOM_SCALE
+from const import BOTTOM_UI_HEIGHT, BUTTON_WIDTH, WIDTH, HEIGHT, BLOCK_SIZE, ZOOM_SCALE
 
 
 @unique
@@ -21,7 +21,7 @@ class App:
     MAP_WIDTH = (
         WIDTH - BUTTON_PANEL_WIDTH
     )  # Adjust map width to leave space for buttons
-    MAP_HEIGHT = HEIGHT
+    MAP_HEIGHT = HEIGHT - BOTTOM_UI_HEIGHT
 
     # Create the root surface (which will hold both the map and button surfaces)
     root_surface = pygame.Surface((WIDTH, HEIGHT))
@@ -31,6 +31,10 @@ class App:
     map_surface = pygame.Surface(
         (cols * BLOCK_SIZE + BUFFER_SIZE, rows * BLOCK_SIZE + BUFFER_SIZE)
     )
+
+    # Create the hud surface 
+    hud_surface_rect = pygame.Rect(0, HEIGHT - BOTTOM_UI_HEIGHT, WIDTH, BOTTOM_UI_HEIGHT)
+    hud_surface = pygame.Surface((WIDTH, BOTTOM_UI_HEIGHT))
 
     # Create the button surface (action view)
     button_surface_rect = pygame.Rect(MAP_WIDTH, 0, BUTTON_PANEL_WIDTH, HEIGHT)
@@ -158,6 +162,9 @@ class App:
 
         # Blit the zoomed map surface onto the root surface
         self.root_surface.blit(zoomed_surface, (0, 0), viewport)
+
+        # Blit the hud surface onto the root surface (at the bottom) 
+        self.root_surface.blit(self.hud_surface, self.hud_surface_rect.topleft)
 
         # Blit the button panel surface onto the root surface (on the right side)
         self.root_surface.blit(self.button_surface, self.button_surface_rect.topleft)
