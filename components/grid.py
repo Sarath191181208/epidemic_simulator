@@ -63,7 +63,7 @@ class Grid:
         self.block_ids: list[list[int]] = [[-1] * self.cols for _ in range(self.rows)]
         self.people: list[Person] = []
         self.path_cache = {}
-        self.hrs: int = 3
+        self.hrs: int = 0
         self.secs: int = 0
         self.day = Day.Monday
 
