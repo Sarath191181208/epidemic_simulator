@@ -36,6 +36,9 @@ def save_grid_as_txt(grid: "Grid", filename: str | None = None):
             f.write("\n")
 
 def load_grid_from_txt(surface: pygame.Surface, grid_size: int, filename: str | None = None) -> "Grid | None":
+    # checkc for saves folder 
+    if not os.path.exists("saves"): 
+        return
     grid = Grid(0, 0, grid_size, surface)
     # if filename is none check the latest file 
     if filename is None:

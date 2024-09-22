@@ -87,6 +87,29 @@ def main():
             )
         )
 
+    buttons_col.add_widget(
+        Button(
+            "save",
+            lambda: save_grid_as_txt(grid),
+            button_color=pygame.Color(*GREEN),
+        )
+    )
+
+    def get_change_to_pan_state():
+        def change_to_pan_state():
+            nonlocal mouse_state
+            mouse_state = MouseState.PANNING 
+        return change_to_pan_state
+
+    # add change to pan state button 
+    buttons_col.add_widget( 
+        Button(
+            "pan",
+            get_change_to_pan_state(),
+            button_color=pygame.Color(*GREEN),
+        )
+    )
+
     is_placing_first_coords = None
     is_placing_last_coords = None
 
