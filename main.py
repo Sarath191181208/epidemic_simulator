@@ -4,6 +4,7 @@ from enum import Enum, unique
 
 from colors import *
 from components.grid import Grid, GridState, load_grid_from_txt, save_grid_as_txt
+from components.timer import SECOND, Timer
 from widgets import Column, Button
 
 # Constants
@@ -89,8 +90,14 @@ def main():
     is_placing_first_coords = None
     is_placing_last_coords = None
 
+    # create a save timer  
+    save_timer = Timer(SECOND*30, lambda: save_grid_as_txt(grid), loop=True)
+    save_timer.start_timer()
+
     # Main loop
     while True:
+        save_timer.update()
+
         root_surface.fill(WHITE)
         map_surface.fill(WHITE)
         button_surface.fill(GREY)
