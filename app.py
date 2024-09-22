@@ -1,7 +1,6 @@
-
 from enum import Enum, unique
 
-import pygame 
+import pygame
 from components.grid import Grid, GridState, load_grid_from_txt, save_grid_as_txt
 from const import BUTTON_WIDTH, WIDTH, HEIGHT, BLOCK_SIZE, ZOOM_SCALE
 
@@ -11,6 +10,7 @@ class MouseState(Enum):
     PANNING = 1
     PLACING = 2
     IS_PLACING = 3
+
 
 class App:
     cols, rows = 100, 100
@@ -92,18 +92,10 @@ class App:
         self.offset_x += dx
         self.offset_y += dy
 
-    def set_block_type(self, block_type: GridState):
-        def set_block():
-            self.mouse_state = MouseState.PLACING
-            self.grid.current_block = block_type
-
-        return set_block
-
-    def set_to_pan_state(self):
-        def change_to_pan_state():
-            self.mouse_state = MouseState.PANNING
-
-        return change_to_pan_state
+    def get_grid(self) -> Grid:
+        return self.grid
+    def get_grid_state(self) -> GridState:
+        return self.grid.current_block
 
     def get_grid_coords(self, mouse_pos: tuple[int, int]) -> tuple[int, int]:
         offset_x, offset_y = self.offset_x, self.offset_y
@@ -146,7 +138,7 @@ class App:
         )
 
     def draw(self):
-        zoom_level = self.zoom_level 
+        zoom_level = self.zoom_level
         offset_x, offset_y = self.offset_x, self.offset_y
 
         # Draw the grid
@@ -169,3 +161,22 @@ class App:
 
         # Blit the button panel surface onto the root surface (on the right side)
         self.root_surface.blit(self.button_surface, self.button_surface_rect.topleft)
+
+    def ops_set_block_type(self, block_type: GridState):
+        def set_block():
+            self.mouse_state = MouseState.PLACING
+            self.grid.current_block = block_type
+
+        return set_block
+
+    def ops_set_border(self, grid_state: GridState):
+        def wrapper():
+            return self.get_grid_state() == grid_state
+
+        return wrapper
+
+    def ops_set_to_pan_state(self):
+        def change_to_pan_state():
+            self.mouse_state = MouseState.PANNING
+
+        return change_to_pan_state

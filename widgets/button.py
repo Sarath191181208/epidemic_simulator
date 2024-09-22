@@ -10,7 +10,7 @@ BUTTON_WIDTH, BUTTON_HEIGHT = 100, 40
 
 
 class Button(Drawable):
-    def __init__(self, text: str, action: Callable[[], None], width: int = BUTTON_WIDTH, height: int = BUTTON_HEIGHT, button_color: pygame.Color = BUTTON_COLOR):
+    def __init__(self, text: str, action: Callable[[], None], width: int = BUTTON_WIDTH, height: int = BUTTON_HEIGHT, button_color: pygame.Color = BUTTON_COLOR, border_color: pygame.Color | None = None, show_border_fn: Callable[[], bool] | None = None):
         super().__init__(width, height)
         self.text = text
         self.action = action
@@ -26,6 +26,9 @@ class Button(Drawable):
         # assign the color 
         self.hover_button_color = pygame.Color(0, 0, 0)
         self.hover_button_color.hsla = (h, s, v, a)
+        
+        self.border_color = border_color or BUTTON_COLOR
+        self.show_border_fn = show_border_fn
 
 
     def draw(self, surface: pygame.Surface):
@@ -35,6 +38,10 @@ class Button(Drawable):
         
         # Draw the button rectangle
         pygame.draw.rect(surface, color, (self.x, self.y, self.width, self.height))
+
+        # check the show_border_fn 
+        if self.show_border_fn is not None and self.show_border_fn():
+            pygame.draw.rect(surface, self.border_color, (self.x, self.y, self.width, self.height), 2)
 
         # check for click 
         self.check_click(mouse_pos)

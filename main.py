@@ -29,23 +29,25 @@ def main():
         ("park", GridState.PARK),
         ("erase", GridState.EMPTY),
     ]
+
     for button_name, grid_state in BUTTONS:
         buttons_col.add_widget(
             Button(
                 button_name,
-                app.set_block_type(grid_state),
+                app.ops_set_block_type(grid_state),
                 button_color=(
                     pygame.Color(*grid_state.value)
                     if grid_state != GridState.EMPTY
                     else pygame.Color(*BLACK)
                 ),
+                show_border_fn=app.ops_set_border(grid_state)
             )
         )
 
     buttons_col.add_widget(
         Button(
             "save",
-            lambda: save_grid_as_txt(grid),
+            lambda: save_grid_as_txt(app.get_grid()),
             button_color=pygame.Color(*GREEN),
         )
     )
@@ -54,7 +56,7 @@ def main():
     buttons_col.add_widget(
         Button(
             "pan",
-            app.set_to_pan_state(),
+            app.ops_set_to_pan_state(),
             button_color=pygame.Color(*GREEN),
         )
     )
