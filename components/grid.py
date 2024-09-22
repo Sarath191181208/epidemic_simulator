@@ -29,17 +29,18 @@ def save_grid_as_txt(grid: "Grid", filename: str | None = None):
     # create a file with the timestamp 
     with open(filename, "w") as f:
         # write the grid dimlensions in the first line 
-        f.write(f"saves/{grid.cols}x{grid.rows}\n")
+        f.write(f"{grid.cols}x{grid.rows}\n")
         for row in grid.grid:
             for block in row:
                 f.write(f"{block.name} ")
             f.write("\n")
 
-def load_grid_from_txt(filename: str | None = None) -> "Grid | None":
-    grid = Grid(0, 0, 0, None)
+def load_grid_from_txt(surface: pygame.Surface, grid_size: int, filename: str | None = None) -> "Grid | None":
+    grid = Grid(0, 0, grid_size, None)
     # if filename is none check the latest file 
     if filename is None:
         files = os.listdir("saves")
+        print(files)
         if not files:
             return 
         filename = max(files)

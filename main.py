@@ -8,7 +8,7 @@ from widgets import Column, Button
 
 # Constants
 WIDTH, HEIGHT = 800, 600
-GRID_SIZE = 20
+BLOCK_SIZE = 20
 ZOOM_SCALE = 1.1
 BUTTON_WIDTH, BUTTON_HEIGHT = 100, 40
 
@@ -41,16 +41,16 @@ def main():
 
     # Create the map surface
     BUFFER_SIZE = 10
-    map_surface = pygame.Surface((cols * GRID_SIZE + BUFFER_SIZE, rows * GRID_SIZE + BUFFER_SIZE))
+    map_surface = pygame.Surface((cols * BLOCK_SIZE + BUFFER_SIZE, rows * BLOCK_SIZE + BUFFER_SIZE))
 
     # Create the button surface (action view)
     button_surface_rect = pygame.Rect(MAP_WIDTH, 0, BUTTON_PANEL_WIDTH, HEIGHT)
     button_surface = pygame.Surface((BUTTON_PANEL_WIDTH, HEIGHT))
 
     # Pass the surface to the grid class
-    grid = load_grid_from_txt()
+    grid = load_grid_from_txt(map_surface, BLOCK_SIZE)
     if grid is None:
-        grid = Grid(cols, rows, GRID_SIZE, map_surface)
+        grid = Grid(cols, rows, BLOCK_SIZE, map_surface)
 
 
     # Camera and zoom variables
@@ -126,8 +126,8 @@ def main():
                     offset_y += dy
                 elif mouse_state == MouseState.IS_PLACING:
                     if map_surface.get_rect().collidepoint(*mouse_pos):
-                        grid_x = int((mouse_pos[0] - offset_x) / (GRID_SIZE * zoom_level))
-                        grid_y = int((mouse_pos[1] - offset_y) / (GRID_SIZE * zoom_level))
+                        grid_x = int((mouse_pos[0] - offset_x) / (BLOCK_SIZE * zoom_level))
+                        grid_y = int((mouse_pos[1] - offset_y) / (BLOCK_SIZE * zoom_level))
 
                         # clear the previous block 
                         assert is_placing_first_coords is not None 
@@ -149,8 +149,8 @@ def main():
             mouse_x, mouse_y = mouse_pos
             # check click on map surface use collide point
             if map_surface.get_rect().collidepoint(mouse_x, mouse_y):
-                grid_x = int((mouse_x - offset_x) / (GRID_SIZE * zoom_level))
-                grid_y = int((mouse_y - offset_y) / (GRID_SIZE * zoom_level))
+                grid_x = int((mouse_x - offset_x) / (BLOCK_SIZE * zoom_level))
+                grid_y = int((mouse_y - offset_y) / (BLOCK_SIZE * zoom_level))
                 if left_click:
                     is_placing_first_coords = (grid_x, grid_y)
                     is_placing_last_coords = (grid_x, grid_y)
