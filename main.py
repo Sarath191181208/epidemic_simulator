@@ -1,17 +1,12 @@
 import pygame
 import sys
-from enum import Enum, unique
 
-from colors import *
-from components.grid import Grid, GridState, load_grid_from_txt, save_grid_as_txt
+from app import App, MouseState
+from colors import BLACK, GREEN, GREY, WHITE
+from components.grid import GridState, save_grid_as_txt
 from components.timer import SECOND, Timer
+from const import HEIGHT, WIDTH
 from widgets import Column, Button
-
-# Constants
-WIDTH, HEIGHT = 800, 600
-BLOCK_SIZE = 20
-ZOOM_SCALE = 1.1
-BUTTON_WIDTH, BUTTON_HEIGHT = 100, 40
 
 # Initialize Pygame
 pygame.init()
@@ -19,56 +14,12 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
 
-@unique
-class MouseState(Enum):
-    PANNING = 1
-    PLACING = 2
-    IS_PLACING = 3
-
-
 def main():
-    cols, rows = 100, 100
+    app = App()
+    grid = app.grid
 
-    BUTTON_PANEL_WIDTH = BUTTON_WIDTH + 20
-
-    # Dimensions
-    MAP_WIDTH = (
-        WIDTH - BUTTON_PANEL_WIDTH
-    )  # Adjust map width to leave space for buttons
-    MAP_HEIGHT = HEIGHT
-
-    # Create the root surface (which will hold both the map and button surfaces)
-    root_surface = pygame.Surface((WIDTH, HEIGHT))
-
-    # Create the map surface
-    BUFFER_SIZE = 10
-    map_surface = pygame.Surface((cols * BLOCK_SIZE + BUFFER_SIZE, rows * BLOCK_SIZE + BUFFER_SIZE))
-
-    # Create the button surface (action view)
-    button_surface_rect = pygame.Rect(MAP_WIDTH, 0, BUTTON_PANEL_WIDTH, HEIGHT)
-    button_surface = pygame.Surface((BUTTON_PANEL_WIDTH, HEIGHT))
-
-    # Pass the surface to the grid class
-    grid = load_grid_from_txt(map_surface, BLOCK_SIZE)
-    if grid is None:
-        grid = Grid(cols, rows, BLOCK_SIZE, map_surface)
-
-
-    # Camera and zoom variables
-    offset_x, offset_y = 0, 0
-    zoom_level = 1.0
-
-    # Set the current app state
-    mouse_state = MouseState.PLACING
-
-    def set_block_type(block_type: GridState):
-        def set_block():
-            nonlocal mouse_state
-            mouse_state = MouseState.PLACING
-            grid.current_block = block_type
-        return set_block
-
-    buttons_col = Column(button_surface, button_surface_rect, MAX_HEIGHT=600)
+    ###### BUTTONS ######
+    buttons_col = Column(app.button_surface, app.button_surface_rect, MAX_HEIGHT=600)
     BUTTONS = [
         ("road", GridState.ROAD),
         ("office", GridState.OFFICE),
@@ -76,14 +27,18 @@ def main():
         ("mall", GridState.MALL),
         ("school", GridState.SCHOOL),
         ("park", GridState.PARK),
-        ("erase", GridState.EMPTY)
+        ("erase", GridState.EMPTY),
     ]
     for button_name, grid_state in BUTTONS:
         buttons_col.add_widget(
             Button(
                 button_name,
-                set_block_type(grid_state),
-                button_color=pygame.Color(*grid_state.value) if grid_state != GridState.EMPTY else pygame.Color(*BLACK),
+                app.set_block_type(grid_state),
+                button_color=(
+                    pygame.Color(*grid_state.value)
+                    if grid_state != GridState.EMPTY
+                    else pygame.Color(*BLACK)
+                ),
             )
         )
 
@@ -95,39 +50,29 @@ def main():
         )
     )
 
-    def set_to_pan_state():
-        def change_to_pan_state():
-            nonlocal mouse_state
-            mouse_state = MouseState.PANNING 
-        return change_to_pan_state
-
-    # add change to pan state button 
-    buttons_col.add_widget( 
+    # add change to pan state button
+    buttons_col.add_widget(
         Button(
             "pan",
-            set_to_pan_state(),
+            app.set_to_pan_state(),
             button_color=pygame.Color(*GREEN),
         )
     )
 
-    is_placing_first_coords = None
-    is_placing_last_coords = None
-
-    # create a save timer  
-    save_timer = Timer(SECOND*30, lambda: save_grid_as_txt(grid), loop=True)
+    # create a save timer
+    save_timer = Timer(SECOND * 30, lambda: save_grid_as_txt(grid), loop=True)
     save_timer.start_timer()
 
     # Main loop
     while True:
         save_timer.update()
 
-        root_surface.fill(WHITE)
-        map_surface.fill(WHITE)
-        button_surface.fill(GREY)
+        app.root_surface.fill(WHITE)
+        app.map_surface.fill(WHITE)
+        app.button_surface.fill(GREY)
 
         mouse_pos = pygame.mouse.get_pos()
         left_click = pygame.mouse.get_pressed()[0]
-        right_click = pygame.mouse.get_pressed()[2]
 
         # Handle events
         for event in pygame.event.get():
@@ -135,111 +80,51 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-            # Handle the chaning of mouse states if h is pressed
+            # handle key press events
             if event.type == pygame.KEYDOWN:
-                # check for num keys and handle trigger the keypress from buttons 
-                if event.key == pygame.K_1: 
-                    grid.current_block = GridState.ROAD 
-                if event.key == pygame.K_2:
-                    grid.current_block = GridState.OFFICE
-                if event.key == pygame.K_3:
-                    grid.current_block = GridState.HOUSE
-                if event.key == pygame.K_4:
-                    grid.current_block = GridState.MALL
-                if event.key == pygame.K_5:
-                    grid.current_block = GridState.SCHOOL
-                if event.key == pygame.K_6:
-                    grid.current_block = GridState.PARK 
-                if event.key == pygame.K_0:
-                    grid.current_block = GridState.EMPTY 
-                if event.key == pygame.K_ESCAPE: 
-                    mouse_state = MouseState.PLACING
-                if event.key == pygame.K_h:
-                    mouse_state = MouseState.PANNING
-                if event.key == pygame.K_v:
-                    mouse_state = MouseState.PLACING
-                if event.key == pygame.K_s:
-                    save_grid_as_txt(grid)
+                app.handle_key_click(event)
+
+            # scroll to zoom
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Zooming
-                if event.button == 4:  # Scroll up to zoom in
-                    zoom_level *= ZOOM_SCALE
-                elif event.button == 5:  # Scroll down to zoom out
-                    zoom_level /= ZOOM_SCALE
+                app.handle_zoom(event)
+
+            # handle mouse motion for drag
             if event.type == pygame.MOUSEMOTION:
-                if mouse_state == MouseState.PANNING and left_click:
-                    dx, dy = event.rel
-                    offset_x += dx
-                    offset_y += dy
-                elif mouse_state == MouseState.IS_PLACING:
-                    if map_surface.get_rect().collidepoint(*mouse_pos):
-                        grid_x = int((mouse_pos[0] - offset_x) / (BLOCK_SIZE * zoom_level))
-                        grid_y = int((mouse_pos[1] - offset_y) / (BLOCK_SIZE * zoom_level))
+                if app.mouse_state == MouseState.PANNING and left_click:
+                    app.update_offset(event.rel)
 
-                        # clear the previous block 
-                        assert is_placing_first_coords is not None 
-                        assert is_placing_last_coords is not None
-                        grid.place_blocks(is_placing_first_coords, is_placing_last_coords, GridState.EMPTY)
+                elif app.mouse_state == MouseState.IS_PLACING:
+                    if app.map_surface.get_rect().collidepoint(*mouse_pos):
+                        app.place_blocks_in_grid(grid, mouse_pos)
 
-                        # place the new block
-                        is_placing_last_coords = (grid_x, grid_y)
-                        grid.place_blocks(is_placing_first_coords, (grid_x, grid_y), grid.current_block)
-
-        # check if released 
-        if mouse_state == MouseState.IS_PLACING and not left_click:
-            is_placing_first_coords = None
-            is_placing_last_coords = None
-            mouse_state = MouseState.PLACING
+        # check if released
+        left_release = not left_click
+        if app.mouse_state == MouseState.IS_PLACING and left_release:
+            app.is_placing_first_coords = None
+            app.is_placing_last_coords = None
+            app.mouse_state = MouseState.PLACING
 
         # check for mouse click
-        if mouse_state == MouseState.PLACING:
-            mouse_x, mouse_y = mouse_pos
-            # check click on map surface use collide point
-            if map_surface.get_rect().collidepoint(mouse_x, mouse_y):
-                grid_x = int((mouse_x - offset_x) / (BLOCK_SIZE * zoom_level))
-                grid_y = int((mouse_y - offset_y) / (BLOCK_SIZE * zoom_level))
-                if left_click:
-                    is_placing_first_coords = (grid_x, grid_y)
-                    is_placing_last_coords = (grid_x, grid_y)
-                    mouse_state = MouseState.IS_PLACING
+        if app.mouse_state == MouseState.PLACING:
+            app.update_place_blocks_state(left_click, mouse_pos)
 
         # Set the cursor based on the mouse state
-        if mouse_state == MouseState.PLACING:
+        if app.mouse_state == MouseState.PLACING:
             pygame.mouse.set_cursor(*pygame.cursors.diamond)
-        elif mouse_state == MouseState.PANNING:
+        elif app.mouse_state == MouseState.PANNING:
             pygame.mouse.set_cursor(
                 *pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
             )
 
-        # Draw the grid
-        grid.draw_grid()
-
-        # Draw the buttons
+        # Draw and update the buttons
         buttons_col.update(pygame.mouse.get_pos())
         buttons_col.draw()
+        
+        # Draw the app
+        app.draw()
 
-        # set limits for zoom level 
-        zoom_level = max(0.5, min(zoom_level, 2))
-        # Create a scaled version of the grid surface for zooming
-        zoomed_surface = pygame.transform.scale(
-            map_surface,
-            (
-                int(map_surface.get_width() * zoom_level),
-                int(map_surface.get_height() * zoom_level),
-            ),
-        )
-
-        # Define the portion of the zoomed surface (map) to display on the screen (viewport)
-        viewport = pygame.Rect(-offset_x, -offset_y, MAP_WIDTH, MAP_HEIGHT)
-
-        # Blit the zoomed map surface onto the root surface
-        root_surface.blit(zoomed_surface, (0, 0), viewport)
-
-        # Blit the button panel surface onto the root surface (on the right side)
-        root_surface.blit(button_surface, button_surface_rect.topleft)
-
-        # Finally, blit the root surface to the screen
-        screen.blit(root_surface, (0, 0))
+        # blit the root surface
+        screen.blit(app.root_surface, (0, 0))
 
         # Update display
         pygame.display.flip()
