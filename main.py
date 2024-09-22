@@ -68,7 +68,7 @@ def main():
             grid.current_block = block_type
         return set_block
 
-    buttons_col = Column(button_surface, button_surface_rect, MAX_HEIGHT=300)
+    buttons_col = Column(button_surface, button_surface_rect, MAX_HEIGHT=600)
     BUTTONS = [
         ("road", GridState.ROAD),
         ("office", GridState.OFFICE),
@@ -83,7 +83,7 @@ def main():
             Button(
                 button_name,
                 set_block_type(grid_state),
-                button_color=pygame.Color(*grid_state.value) if grid_state != GridState.EMPTY else pygame.Color(*GREY),
+                button_color=pygame.Color(*grid_state.value) if grid_state != GridState.EMPTY else pygame.Color(*BLACK),
             )
         )
 
