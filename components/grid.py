@@ -17,51 +17,6 @@ class GridState(Enum):
     PARK = PARK_COLOR
     EMPTY = None
 
-def save_grid_as_txt(grid: "Grid", filename: str | None = None):
-    if filename is None:
-        ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"saves/grid_{ts}.txt"
-
-    # create saves folder if it doesn't exist 
-    if not os.path.exists("saves"):
-        os.makedirs("saves")
-
-    # create a file with the timestamp 
-    with open(filename, "w") as f:
-        # write the grid dimlensions in the first line 
-        f.write(f"{grid.cols}x{grid.rows}\n")
-        for row in grid.grid:
-            for block in row:
-                f.write(f"{block.name} ")
-            f.write("\n")
-
-def load_grid_from_txt(surface: pygame.Surface, grid_size: int, filename: str | None = None) -> "Grid | None":
-    # checkc for saves folder 
-    if not os.path.exists("saves"): 
-        return
-    grid = Grid(0, 0, grid_size, surface)
-    # if filename is none check the latest file 
-    if filename is None:
-        files = os.listdir("saves")
-        if not files:
-            return 
-        filename = max(files)
-    
-    # open the file and read the grid dimensions 
-    with open(f"saves/{filename}", "r") as f:
-        cols, rows = map(int, f.readline().strip().split("x"))
-        grid.cols = cols
-        grid.rows = rows
-        grid.grid = [[GridState.EMPTY for _ in range(cols)] for _ in range(rows)]
-
-        # read the grid blocks 
-        for y, line in enumerate(f):
-            blocks = line.strip().split(" ")
-            for x, block in enumerate(blocks):
-                grid.grid[y][x] = GridState[block]
-
-    return grid
-
 class Grid:
     def __init__(self, cols, rows, grid_size, surface):
         self.cols = cols
@@ -110,3 +65,48 @@ class Grid:
     def remove_block(self, x: int, y: int):
         if self.check_in_bounds(x, y):
             self.place_block(x, y, GridState.EMPTY)
+
+def save_grid_as_txt(grid: "Grid", filename: str | None = None):
+    if filename is None:
+        ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"saves/grid_{ts}.txt"
+
+    # create saves folder if it doesn't exist 
+    if not os.path.exists("saves"):
+        os.makedirs("saves")
+
+    # create a file with the timestamp 
+    with open(filename, "w") as f:
+        # write the grid dimlensions in the first line 
+        f.write(f"{grid.cols}x{grid.rows}\n")
+        for row in grid.grid:
+            for block in row:
+                f.write(f"{block.name} ")
+            f.write("\n")
+
+def load_grid_from_txt(surface: pygame.Surface, grid_size: int, filename: str | None = None) -> "Grid | None":
+    # checkc for saves folder 
+    if not os.path.exists("saves"): 
+        return
+    grid = Grid(0, 0, grid_size, surface)
+    # if filename is none check the latest file 
+    if filename is None:
+        files = os.listdir("saves")
+        if not files:
+            return 
+        filename = max(files)
+    
+    # open the file and read the grid dimensions 
+    with open(f"saves/{filename}", "r") as f:
+        cols, rows = map(int, f.readline().strip().split("x"))
+        grid.cols = cols
+        grid.rows = rows
+        grid.grid = [[GridState.EMPTY for _ in range(cols)] for _ in range(rows)]
+
+        # read the grid blocks 
+        for y, line in enumerate(f):
+            blocks = line.strip().split(" ")
+            for x, block in enumerate(blocks):
+                grid.grid[y][x] = GridState[block]
+
+    return grid
