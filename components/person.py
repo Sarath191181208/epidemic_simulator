@@ -40,7 +40,12 @@ class Person:
     def get_src(self, day: Day) -> PlaceLoc:
         return self.get_day_schedule(day)[self.current_idx][0]
 
+    def day_changed(self, new_day: Day):
+        self.time = 0
+        self.current_idx = 0
+
     def update(self, day: Day):
+        self.current_idx %= len(self.get_day_schedule(day))
         if self.state == PersonState.Staying:
             self.time += 1
             t = self.get_day_schedule(day)[self.current_idx][1]
@@ -52,11 +57,10 @@ class Person:
             if self.loc == self.get_dest(day):
                 self.state = PersonState.Staying
                 self.current_idx += 1
-                self.current_idx %= len(self.get_day_schedule(day))
 
     def get_dest(self, day: Day) -> PlaceLoc:
-        if self.current_idx + 1 >= len(self.get_day_schedule(day)):
-            return self.loc
+        # if self.current_idx + 1 >= len(self.get_day_schedule(day)):
+        #     return self.loc
         return self.get_day_schedule(day)[self.current_idx + 1][0]
 
     def get_day_schedule(self, day: Day) -> DaySchedule:

@@ -184,6 +184,8 @@ class Grid:
             if self.hrs == 24:
                 self.hrs = 0
                 self.day = Day((self.day.value + 1) % 6)
+                for p in self.people:
+                    p.day_changed(self.day)
         # move the person if they are in moving state
         moving_persons = [
             (i, person)
@@ -201,7 +203,14 @@ class Grid:
                 path = self.calculate_path(person)
                 self.path_cache[i] = path
 
-            if not path:
+            path_completed = path is None or len(path) == 0
+            if path_completed:
+                # remove the path from the cache 
+                self.path_cache.pop(i)
+                # change the persons state to staying 
+                person.state = PersonState.Staying
+                # go to the current location 
+                person.current_idx += 1
                 continue
 
             dest = path[0]
