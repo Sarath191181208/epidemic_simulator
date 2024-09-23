@@ -165,7 +165,7 @@ def main():
         # Create a text on app.hud_surface with grid.day, grid.hour, grid.sec use pygame
         font = pygame.font.Font(None, 36)
         text = font.render(
-            f"Day: {app.simulation.day}, Hour: {app.simulation.hrs}, Sec: {app.simulation.secs}",
+            f"Day: {app.simulation.day}, Hour: {app.simulation.hrs}, Min: {app.simulation.secs}",
             True,
             BLACK,
         )
