@@ -193,9 +193,6 @@ class Grid:
             if person.state == PersonState.Moving
         ]
 
-        # get all the people locations
-        people_locs = {person.loc for person in self.people}
-
         for i, person in moving_persons:
             if i in self.path_cache:
                 path = self.path_cache[i]
@@ -213,14 +210,8 @@ class Grid:
                 person.current_idx += 1
                 continue
 
-            dest = path[0]
-            if dest in people_locs:
-                continue
-
-            path.pop(0)
+            dest = path.pop(0)
             person.loc = dest
-            people_locs.add(dest)
-            people_locs.remove(person.loc)
 
     def get_closest_road(self, loc: tuple[int, int]) -> tuple[int, int] | None:
         # find the nearest road which should be connected to the current block
