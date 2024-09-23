@@ -2,6 +2,7 @@ from enum import Enum, unique
 
 import pygame
 from components.grid import Grid, GridState, load_grid_from_txt, save_grid_as_txt
+from components.simulation import Simulation
 from const import BOTTOM_UI_HEIGHT, BUTTON_WIDTH, WIDTH, HEIGHT, BLOCK_SIZE, ZOOM_SCALE
 
 
@@ -45,6 +46,9 @@ class App:
     if _grid is None:
         _grid = Grid(cols, rows, BLOCK_SIZE, map_surface)
     grid: Grid = _grid
+
+    # load the simulation 
+    simulation = Simulation(grid)
 
     # Camera and zoom variables
     offset_x, offset_y = 0, 0
@@ -147,6 +151,9 @@ class App:
 
         # Draw the grid
         self.grid.draw_grid()
+
+        # draw the people and simulation 
+        self.simulation.draw()
 
         # Create a scaled version of the grid surface for zooming
         zoomed_surface = pygame.transform.scale(

@@ -40,7 +40,7 @@ def main():
                     if grid_state != GridState.EMPTY
                     else pygame.Color(*BLACK)
                 ),
-                show_border_fn=app.ops_set_border(grid_state)
+                show_border_fn=app.ops_set_border(grid_state),
             )
         )
 
@@ -61,9 +61,12 @@ def main():
         )
     )
 
-    simulation_timer = Timer(SECOND/(120), lambda: app.get_grid().update_min(), loop=True)
+    simulation_timer = Timer(
+        SECOND / (120), lambda: app.simulation.update_min(), loop=True
+    )
+
     def start_simulation():
-        app.grid.generate_population()
+        app.simulation.generate_population()
         simulation_timer.start_timer()
 
     buttons_col.add_widget(
@@ -131,21 +134,23 @@ def main():
         # Set the cursor based on the mouse state
         if app.mouse_state == MouseState.PLACING:
             # pygame.mouse.set_cursor(*pygame.cursors.diamond)
-            # the cursor should have a color at the center 
+            # the cursor should have a color at the center
             cx, cy = 16, 16
-            cursor_surf = pygame.Surface((32, 32), pygame.SRCALPHA) 
+            cursor_surf = pygame.Surface((32, 32), pygame.SRCALPHA)
 
-            # draw a circle 
-            pygame.draw.circle(cursor_surf, grid.current_block.value or (GREY), (cx, cy), 12)
-            # draw a black outline around the circle 
+            # draw a circle
+            pygame.draw.circle(
+                cursor_surf, grid.current_block.value or (GREY), (cx, cy), 12
+            )
+            # draw a black outline around the circle
             pygame.draw.circle(cursor_surf, BLACK, (cx, cy), 12, 2)
-            # draw a cross 
+            # draw a cross
             pygame.draw.line(cursor_surf, BLACK, (cx - 5, cy), (cx + 5, cy), 2)
             pygame.draw.line(cursor_surf, BLACK, (cx, cy - 5), (cx, cy + 5), 2)
-    
-            # Create the cursor 
+
+            # Create the cursor
             cursor = pygame.cursors.Cursor((16, 16), cursor_surf)
-            # set the cursor 
+            # set the cursor
             pygame.mouse.set_cursor(cursor)
 
         elif app.mouse_state == MouseState.PANNING:
@@ -157,9 +162,13 @@ def main():
         buttons_col.update(pygame.mouse.get_pos())
         buttons_col.draw()
 
-        # Create a text on app.hud_surface with grid.day, grid.hour, grid.sec use pygame 
+        # Create a text on app.hud_surface with grid.day, grid.hour, grid.sec use pygame
         font = pygame.font.Font(None, 36)
-        text = font.render(f"Day: {grid.day}, Hour: {grid.hrs}, Sec: {grid.secs}", True, BLACK)
+        text = font.render(
+            f"Day: {app.simulation.day}, Hour: {app.simulation.hrs}, Sec: {app.simulation.secs}",
+            True,
+            BLACK,
+        )
         app.hud_surface.blit(text, (10, 10))
 
         # Draw the app
